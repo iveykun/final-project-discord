@@ -492,6 +492,11 @@ class Music(commands.Cog):
     async def date_(self, message):
         today = time.strftime('%m%d')
         await message.channel.send('It is {}'.format(str(today)))
+    @commands.command(name='help?')
+    async def help_(self, message):
+        await message.channel.send('Tell me your birthday in the format [prefix]setbday MMDD')
+        await message.channel.send('ping praise clever time happy date help? play pause resume leave')
+        await message.channel.send('I announce birthdays everyday at 11:15')
 
 
 bot = commands.Bot(';', description='I am the cutest Eevee, who sings and dances for you! Prefix is ;')
