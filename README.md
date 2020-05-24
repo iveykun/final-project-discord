@@ -17,6 +17,12 @@ Then you have to replace the token in the code (bot.run(token)) with the token y
 
 On your PC, make sure to download discord.py[voice] as well as asyncio, FFmpeg, youtube-dl, as well as any dependencies. I can't keep track of everything I need, so you will unfortunaltely have to read the errors and install any missing libraries.
 
+If everything works, create a file named birthdayFile.txt and put it in the same folder as the bot file.
+
+To run the bot, in your command prompt after doing cd (path/to/file/bot.py) you should run python3 bot.py (i named my file main.py but choose whatever you like)
+
+A common problem with this program is indentations (especially if you planned on using raspberry pi to run it like me) because nano is so strict with indents. As of may 24 2020 this bot is only confirmed to be working on windows, I have written another basic version (that only does birthday announcing) that runs on linux and raspi and I will provide if you ask for it.
+
 Commands:
 
 ping: returns pong! in the chat. Used to test if the bot is online
