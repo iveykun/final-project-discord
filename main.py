@@ -14,10 +14,12 @@ import discord
 import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
-token = '' #SHOULD BE REDACTED
+token = 'NTAyOTkwNjI2MzYzNjcwNTU4.Xh34EA.jurYTHLDZ-xXG2gsohZM1xhy0Qo' #SHOULD BE REDACTED
 
 '''This bot is horribly complicated to setup, you need stuff like FFmpeg, discord.py[voice], youtube-dl... setup in your computer... without mentionning the complicated things you need to do to get a bot license (developer license basically) and a bot token from discord. I need to set paths and stuff manually, since using pip install doesn't seem to work. At first I tested a version with just the birthday functions which I hosted on my raspberry pi at home, and it worked perfectly fine, but once I started adding all those new dependencies it started going crazy (raspi uses python 2.7 by default so maybe my installation of 3.7 was broken) so I had to manually get FFmpeg from their website, unzip it and set the PATH in windows. During my testing on raspi I also discovered that it couldn't read multiple files, so I had to scrap the idea of a dot env and a separate birthday list .txt. Originally the token of my bot would be stored securely in a .env, with the birthdays file having redundant copies to avoid overwriting, but here we are with a list and a string lmao. Another peoblem that I had to face was the lack of f-strings... I never knew it was such a recent implementation, causing me hours of pain trying to figure out why my bot didn't work. Again, raspi running python 2.7 sucks. Originally, the idea was to use threading and timers to make the bot run birthday() once every 24 hours, but I found it simpler to just set up a crontab in raspi and set a timeout of around 23 hours. After I moved to windows, I simply set up a task scheduler to run at the same time every day so it can announce birthdays. To setup the dependencies and stuff like YTDL, I was greatly inspired by the official documentation on said libraries. In fact, i'm using their default settings, which are all copy pasted straight from their github lol. The hardest part was to deal with different versions. Dependencies are so complicated it drives me crazy. Discord.py has a version 0 and version 1, which are called async and rewrite respectively. Version 0, which is what I used at first because of the tutorials on youtube, is not supported anymore by most dependencies, and would require me to downgrade my packages. That's when I switched to rewrite (version 1.0) which made it even more complicated because I didn't know which version was the ones that are supported... Which is why I migrated everything to Windows. On raspi, without a micro HDMI cable I can't do shit. Had to use FireZilla FTP to transfer files and some chrome extension SSH to run the code, and nano is a horrible text editor (ctrl+k for cut??? really? and ctrl+c doesn't work?????). Usually most of my apps are made for windows, but a bot that needs to be online 24/7 was a nice thing to host on my raspi which was gathering dust anyway... I regret infinitely ever thinking that programming on a raspi would be as easy as on windows. I was so happy when it started working at 240am... I never want to touch this ever again and hope it never breaks. Amen.'''
 
+
+status = ['Use', 'the', 'prefix', ';']
 
 #not sure it works anymore because a python program can't save itself, it has to be saved manually
 praisecount = 12
@@ -493,7 +495,7 @@ class Music(commands.Cog):
 
     @commands.command(name='help')
     async def help_(self, message):
-
+        await message.channel.send('Tell me your birthday in the format [prefix]setbday MMDD')
         await message.channel.send('ping praise clever time happy date help play pause resume leave')
         await message.channel.send('I announce birthdays everyday at 11:15')
 
@@ -521,7 +523,9 @@ def maker():
 
 async def birthday():
     # set to the test server
-    channel = bot.get_channel(-----PUT YOUR CHANNEL HERE !!!------)
+    channel = bot.get_channel(419828102424690689)
+    #557174757485969415 kaede
+    #408948703039193089 rewrite
     #fileName = open("birthdayFile.txt", 'r')
     bdays = maker()
 
