@@ -23,6 +23,8 @@ To run the bot, in your command prompt after doing cd (path/to/file/bot.py) you 
 
 A common problem with this program is indentations (especially if you planned on using raspberry pi to run it like me) because nano is so strict with indents. As of may 24 2020 this bot is only confirmed to be working on windows, I have written another basic version (that only does birthday announcing) that runs on linux and raspi and I will provide if you ask for it.
 
+The basic version is confirmed to be working on linux, windows, as well as a web server such as AWS and heroku.
+
 Commands:
 
 ping: returns pong! in the chat. Used to test if the bot is online
@@ -54,3 +56,5 @@ and after that you can run ;play (any youtube url)
 if you do not join before hand it will join automatically.
 
 setbday works by taking the username (like mine is ivey-kun#2275) which is unique for every discord user, and then saves it into a file with their birthday like january 2nd would be 0102. The bot checks the first 4 characters of each line in the file and then compares it with today's date. If there is a match, the function birthday() will send a birthday wish in the chat. You have to change the chat ID for every different server, in this code it is set to my personal test server. 
+
+if the person has already set his birthday, the bot will simply recall the bday and will not set another instance. Howevwre, if they made a mistake, you will have to go in the birthdayFile.txt and remove it manually because using w+ in my program erases all the birthdays. I have resorted to using a+ to avoid that.
