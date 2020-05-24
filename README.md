@@ -11,6 +11,12 @@ How to use:
 
 It is complicated to set up, i can provide a video of me explaining all the different functions if you want.
 
+First you need to go to discord developer portal and make an account, after which you will have to make a new "app" as well as a new "bot" user. Name it however you wish; mine is called Leafeon. The most important part is to obtain a "token" which is a type of license for the bot to be able to connect to discord servers. 
+
+Then you have to replace the token in the code (bot.run(token)) with the token you obtained. Token is like a ID for a bot. 
+
+On your PC, make sure to download discord.py[voice] as well as asyncio, FFmpeg, youtube-dl, as well as any dependencies. I can't keep track of everything I need, so you will unfortunaltely have to read the errors and install any missing libraries.
+
 Commands:
 
 ping: returns pong! in the chat. Used to test if the bot is online
@@ -32,3 +38,13 @@ volume (0-100): sets volume between 0 and 100
 
 
 I have disabled skipping songs as it was causing some problems.
+
+BOT USAGE
+You can change the prefix of the bot in one of the last lines of the code. Default is ;
+Make sure the bot is online with [prefix]ping
+
+After that, make sure you are connected to a voice channel and run ;join
+and after that you can run ;play (any youtube url)
+if you do not join before hand it will join automatically.
+
+setbday works by taking the username (like mine is ivey-kun#2275) which is unique for every discord user, and then saves it into a file with their birthday like january 2nd would be 0102. The bot checks the first 4 characters of each line in the file and then compares it with today's date. If there is a match, the function birthday() will send a birthday wish in the chat. You have to change the chat ID for every different server, in this code it is set to my personal test server. 
