@@ -14,14 +14,16 @@ import discord
 import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
-token = 'NTAyOTkwNjI2MzYzNjcwNTU4.Xh34EA.jurYTHLDZ-xXG2gsohZM1xhy0Qo' #SHOULD BE REDACTED
+token = 'REDACTED' #SHOULD BE REDACTED OR DISCORD SENDS YOU WARNING EMAILS
 
+#DEVELOPER DIARY
 '''This bot is horribly complicated to setup, you need stuff like FFmpeg, discord.py[voice], youtube-dl... setup in your computer... without mentionning the complicated things you need to do to get a bot license (developer license basically) and a bot token from discord. I need to set paths and stuff manually, since using pip install doesn't seem to work. At first I tested a version with just the birthday functions which I hosted on my raspberry pi at home, and it worked perfectly fine, but once I started adding all those new dependencies it started going crazy (raspi uses python 2.7 by default so maybe my installation of 3.7 was broken) so I had to manually get FFmpeg from their website, unzip it and set the PATH in windows. During my testing on raspi I also discovered that it couldn't read multiple files, so I had to scrap the idea of a dot env and a separate birthday list .txt. Originally the token of my bot would be stored securely in a .env, with the birthdays file having redundant copies to avoid overwriting, but here we are with a list and a string lmao. Another peoblem that I had to face was the lack of f-strings... I never knew it was such a recent implementation, causing me hours of pain trying to figure out why my bot didn't work. Again, raspi running python 2.7 sucks. Originally, the idea was to use threading and timers to make the bot run birthday() once every 24 hours, but I found it simpler to just set up a crontab in raspi and set a timeout of around 23 hours. After I moved to windows, I simply set up a task scheduler to run at the same time every day so it can announce birthdays. To setup the dependencies and stuff like YTDL, I was greatly inspired by the official documentation on said libraries. In fact, i'm using their default settings, which are all copy pasted straight from their github lol. The hardest part was to deal with different versions. Dependencies are so complicated it drives me crazy. Discord.py has a version 0 and version 1, which are called async and rewrite respectively. Version 0, which is what I used at first because of the tutorials on youtube, is not supported anymore by most dependencies, and would require me to downgrade my packages. That's when I switched to rewrite (version 1.0) which made it even more complicated because I didn't know which version was the ones that are supported... Which is why I migrated everything to Windows. On raspi, without a micro HDMI cable I can't do shit. Had to use FireZilla FTP to transfer files and some chrome extension SSH to run the code, and nano is a horrible text editor (ctrl+k for cut??? really? and ctrl+c doesn't work?????). Usually most of my apps are made for windows, but a bot that needs to be online 24/7 was a nice thing to host on my raspi which was gathering dust anyway... I regret infinitely ever thinking that programming on a raspi would be as easy as on windows. I was so happy when it started working at 240am... I never want to touch this ever again and hope it never breaks. Amen.'''
 
 
-status = ['Use', 'the', 'prefix', ';']
+#status = ['Use', 'the', 'prefix', ';']
 
 #not sure it works anymore because a python program can't save itself, it has to be saved manually
+#edit: WORKS NOW
 praisecount = 12
 
 #stolen from the official gitbhub, those are the recommended settings.
@@ -50,6 +52,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
     ytdl = youtube_dl.YoutubeDL(YTDL_OPTIONS)
 
     #documentation is really great because it saves me he bulk of the work
+    #I was heavily inspired by "discord music bot example"
+    #giving them credit where it's due :)
 
     def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5):
         super().__init__(source, volume)
@@ -65,7 +69,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.thumbnail = data.get('thumbnail')
         self.description = data.get('description')
-        self.duration = self.parse_duration(int(data.get('duration')))
+        self.duration = self.parse(int(data.get('duration')))
         self.tags = data.get('tags')
         self.url = data.get('webpage_url')
         self.views = data.get('view_count')
@@ -87,18 +91,18 @@ class YTDLSource(discord.PCMVolumeTransformer):
             raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
 
         if 'entries' not in data:
-            process_info = data
+            process = data
         else:
-            process_info = None
+            process = None
             for entry in data['entries']:
                 if entry:
-                    process_info = entry
+                    process = entry
                     break
 
-            if process_info is None:
+            if process is None:
                 raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
 
-        webpage_url = process_info['webpage_url']
+        webpage_url = process['webpage_url']
         partial = functools.partial(cls.ytdl.extract_info, webpage_url, download=False)
         processed_info = await loop.run_in_executor(None, partial)
 
@@ -118,11 +122,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
 
     @staticmethod
-    def parse_duration(duration: int):
+    def parse(duration: int):
         minutes, seconds = divmod(duration, 60)
         hours, minutes = divmod(minutes, 60)
         days, hours = divmod(hours, 24)
-
         duration = []
         if days > 0:
             duration.append('{} days'.format(days))
@@ -311,25 +314,11 @@ class Music(commands.Cog):
         await ctx.voice_state.stop()
         del self.voice_states[ctx.guild.id]
 
-    @commands.command(name='volume')
-    async def _volume(self, ctx: commands.Context, *, volume: int):
-        """Sets the volume at which I am singing"""
-
-        if not ctx.voice_state.is_playing:
-            return await ctx.send('I am not singing at the moment.')
-
-        if 0 > volume > 100:
-            return await ctx.send('Volume must be between 0 and 100')
-
-        ctx.voice_state.volume = volume / 100
-        await ctx.send('I am singing at {}% volume'.format(volume))
-
     @commands.command(name='now', aliases=['current', 'playing', 'np'])
     async def _now(self, ctx: commands.Context):
         """Displays the song I am singing"""
 
         await ctx.send(embed=ctx.voice_state.current.create_embed())
-
     @commands.command(name='pause')
     @commands.has_permissions(manage_guild=True)
     async def _pause(self, ctx: commands.Context):
@@ -360,12 +349,8 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('⏹')
 
 
-
     @commands.command(name='queue')
     async def _queue(self, ctx: commands.Context, *, page: int = 1):
-        """Shows the player's queue.
-        You can optionally specify the page to show. Each page contains 10 elements.
-        """
 
         if len(ctx.voice_state.songs) == 0:
             return await ctx.send('You haven\'t requested other songs')
@@ -492,12 +477,12 @@ class Music(commands.Cog):
     async def date_(self, message):
         today = time.strftime('%m%d')
         await message.channel.send('It is {}'.format(str(today)))
+
     @commands.command(name='help?')
     async def help_(self, message):
         await message.channel.send('Tell me your birthday in the format [prefix]setbday MMDD')
         await message.channel.send('ping praise clever time happy date help? play pause resume leave')
         await message.channel.send('I announce birthdays everyday at 11:15')
-
 
 bot = commands.Bot(';', description='I am the cutest Eevee, who sings and dances for you! Prefix is ;')
 bot.add_cog(Music(bot))
